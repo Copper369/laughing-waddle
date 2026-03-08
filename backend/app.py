@@ -9,27 +9,20 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     
-    # Configure CORS to allow frontend domain
-    frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
-    
-    # Build list of allowed origins
-    allowed_origins = [
-        "http://localhost:3000",
-        "http://localhost:5173",
-    ]
-    
-    # Add production frontend URL if set
-    if frontend_url and frontend_url not in allowed_origins:
-        allowed_origins.append(frontend_url)
-    
-    # Also allow any vercel.app domain for this project
-    allowed_origins.append("https://laughing-waddle-snowy.vercel.app")
-    
+    # Configure CORS - Allow Vercel frontend
     CORS(app, 
-         resources={r"/*": {"origins": allowed_origins}},
-         supports_credentials=True,
-         allow_headers=["Content-Type", "Authorization"],
-         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+         resources={r"/*": {
+             "origins": [
+                 "http://localhost:3000",
+                 "http://localhost:5173", 
+                 "https://laughing-waddle-snowy.vercel.app",
+                 "https://*.vercel.app"  # Allow all Vercel preview deployments
+             ],
+             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+             "allow_headers": ["Content-Type", "Authorization"],
+             "supports_credentials": True,
+             "expose_headers": ["Content-Type", "Authorization"]
+         }}
     )
     
     db.init_app(app)
