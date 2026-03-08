@@ -10,12 +10,20 @@ def create_app():
     app.config.from_object(Config)
     
     # Configure CORS to allow frontend domain
+    frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+    allowed_origins = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        frontend_url
+    ]
+    
+    # Add Railway frontend URL if different
+    if frontend_url not in allowed_origins:
+        allowed_origins.append(frontend_url)
+    
     CORS(app, resources={
         r"/*": {
-            "origins": [
-                "http://localhost:3000",
-                "https://victorious-warmth-production.up.railway.app"
-            ],
+            "origins": allowed_origins,
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
             "supports_credentials": True
