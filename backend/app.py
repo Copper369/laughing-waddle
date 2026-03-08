@@ -11,24 +11,26 @@ def create_app():
     
     # Configure CORS to allow frontend domain
     frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+    
+    # Build list of allowed origins
     allowed_origins = [
         "http://localhost:3000",
         "http://localhost:5173",
-        frontend_url
     ]
     
-    # Add Railway frontend URL if different
-    if frontend_url not in allowed_origins:
+    # Add production frontend URL if set
+    if frontend_url and frontend_url not in allowed_origins:
         allowed_origins.append(frontend_url)
     
-    CORS(app, resources={
-        r"/*": {
-            "origins": allowed_origins,
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization"],
-            "supports_credentials": True
-        }
-    })
+    # Also allow any vercel.app domain for this project
+    allowed_origins.append("https://laughing-waddle-snowy.vercel.app")
+    
+    CORS(app, 
+         resources={r"/*": {"origins": allowed_origins}},
+         supports_credentials=True,
+         allow_headers=["Content-Type", "Authorization"],
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    )
     
     db.init_app(app)
     jwt = JWTManager(app)
